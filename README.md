@@ -47,7 +47,7 @@ saturation_msg: Function will use a slider to allow for a white light surge
 stepper_msg: Function will use the stepper buttons to control the colors of the lights ranging from 40 (Yellow) to 3 (Red)
 
 
-![Lights Off](media/Lights_off.jpg)
-![Max Brightness](media/max_brightness.jpg)
-![Max Saturation](media/max_saturation.jpg)
-![Turning Off](media/turning_off.jpg)
+![Lights Off](/media/lights_off.jpg)
+![Max Brightness](/media/max_brightness.jpg)
+![Max Saturation](/media/max_saturation.jpg)
+![Turning Off](/media/turning_off.jpg)
