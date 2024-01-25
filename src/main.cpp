@@ -5,8 +5,8 @@
 #include <OSCData.h>
 #include <FastLED.h>
 
-char ssid[] = "dlink";  // wifi network SSID (name)
-char pass[] = ""; // wifi network password
+char ssid[] = "dlink";                  // wifi network SSID (name)
+char pass[] = "";                       // wifi network password
 
 
 // A UDP instance to let us send and receive packets over UDP
@@ -36,14 +36,14 @@ void setup() {
   // put your setup code here, to run once:
  Serial.begin(9600);
 
-    WiFi.begin(ssid, pass);
+    WiFi.begin(ssid, pass);              //connect to Wifi
 
-    while (WiFi.status() != WL_CONNECTED) {
+    while (WiFi.status() != WL_CONNECTED) { 
         delay(500);
-        Serial.println("."); // working on it...
+        Serial.println(".");              // working on it...
     }
     // IPAddress local_IP(192, 168, 0, 199);
-    IPAddress StaticIP(192, 168, 0, 210);
+    IPAddress StaticIP(192, 168, 0, 210); //set staticIP
     IPAddress gateway(192,168,0,1);
     IPAddress subnet(255,255,255,0);
     // IPAddress ip(192, 168, 0, 199);
@@ -51,18 +51,16 @@ void setup() {
 
     Serial.println("WiFi connected");
     Serial.print("IP: ");
-    Serial.println(WiFi.localIP());
+    Serial.println(WiFi.localIP());      //Print LocalIP for Serial Monitor
 
     Serial.println("Starting UDP");
     Udp.begin(localPort);
     Serial.print("Local port: ");
-    // Serial.println(Udp.localPort());
 
 
-    // wait a few seconds so someone can see the IP address if they're watching
+                                        // wait a few seconds so someone can see the IP address if they're watching
     delay(3000);
 
-      //Serial.begin(921600);
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
   for(int i = 0; i<NUM_LEDS; i++){
     leds[i] = CHSV(50,255,0); 
@@ -137,27 +135,26 @@ void wipeOff(){
 }
 
 void idleTime(){
-  delay(5000); //delays for 5 seconds. Can be replaced by a wait for a message.
-  state = 2;  //returns to wipeOn, raising the candless to lit.
+  delay(5000);                           //delays for 5 seconds. Can be replaced by a wait for a message.
+  state = 2;                             //returns to wipeOn, raising the candless to lit.
 }
 
 
-void button_msg(OSCMessage &msg, int x)
+void button_msg(OSCMessage &msg, int x)  //Function when microcontroller recieves button input
 {
   if (wipeTemp == 0) {
-    state = 2;
-    wipeTemp = 1;
-  } else {
-    state = 3;
-    wipeTemp = 0;
+    state = 2;                           //wipeOn()
+    wipeTemp = 1;                        //set status to on
+  } else { 
+    state = 3;                           //wipeOff()
+    wipeTemp = 0;                        //set status to off
   }
-  Serial.print("button: ");
 }
 
 void brightness_msg(OSCMessage &msg, int x)
 {
   float data = msg.getFloat(0);
-  Serial.print("slider: ");
+  Serial.print("slider: ");             //send brightness value to serial monitor
   Serial.println(data);
 
   brightness = (data*100) + 70;
@@ -166,26 +163,25 @@ void brightness_msg(OSCMessage &msg, int x)
 void saturation_msg(OSCMessage &msg, int x)
 {
   float data = msg.getFloat(0);
-  Serial.print("slider: ");
+  Serial.print("slider: ");              //send saturation value to serial monitor
   Serial.println(data);
 
   saturation = data*254;
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
 
-    OSCMessage msg;
-    int size = Udp.parsePacket();
+    OSCMessage msg; 
+    int size = Udp.parsePacket();       //size of UDP message
     if (size > 0) {
         while (size--) {
-            msg.fill(Udp.read());
+            msg.fill(Udp.read());       //read the message
         }
-        if (!msg.hasError()) {
+        if (!msg.hasError()) {          //if microcontroller recieves message
 
-            msg.route("/toggle", button_msg);
-            msg.route("/brightness", brightness_msg);
-            msg.route("/saturation", saturation_msg);
+            msg.route("/toggle", button_msg); //call button_msg
+            msg.route("/brightness", brightness_msg); //call brightness_msg
+            msg.route("/saturation", saturation_msg); //call saturation_msg
 
         } else {
             error = msg.getError();
@@ -194,6 +190,6 @@ void loop() {
         }
     }
 
-flicker();
+flicker();                             //call flicker loop to change state
 
 }
