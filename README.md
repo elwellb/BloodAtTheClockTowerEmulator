@@ -1,6 +1,6 @@
 README Mech&Art
 
-
+Creators: Braden Elwell, Nich Muoio, Carlos Sanchez-Sarmiento, Bronson Leiro, & Mason Gibson
 
 ***********************************************
 ***************Project Scope*******************
@@ -28,7 +28,7 @@ CleanOSC App (iOS) - https://drive.google.com/file/d/17lonoMOboATWMAYjYpn-0LgKWG
 *****************Functions:********************
 ***********************************************
 
-Lights Video: https://drive.google.com/file/d/141De7I2WXfT_pGKDUq8cdS1eSMpls4IO/view?usp=sharing
+
 
 Setup: Allows for the connection of board to phone via OSC and initializes the LEDs with address
 
@@ -45,3 +45,9 @@ brightness_msg: Function will use a slider to contol brightness of lights. Limit
 saturation_msg: Function will use a slider to allow for a white light surge
 
 stepper_msg: Function will use the stepper buttons to control the colors of the lights ranging from 40 (Yellow) to 3 (Red)
+
+
+![Lights Off](media/Lights_off.jpg)
+![Max Brightness](media/max_brightness.jpg)
+![Max Saturation](media/max_saturation.jpg)
+![Turning Off](media/turning_off.jpg)

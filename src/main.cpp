@@ -5,8 +5,8 @@
 #include <OSCData.h>
 #include <FastLED.h>
 
-char ssid[] = "dlink";                  // wifi network SSID (name)
-char pass[] = "";                       // wifi network password
+char ssid[] = "dlink";  // wifi network SSID (name)
+char pass[] = ""; // wifi network password
 
 
 // A UDP instance to let us send and receive packets over UDP
@@ -36,14 +36,14 @@ void setup() {
   // put your setup code here, to run once:
  Serial.begin(9600);
 
-    WiFi.begin(ssid, pass);              //connect to Wifi
+    WiFi.begin(ssid, pass);
 
-    while (WiFi.status() != WL_CONNECTED) { 
+    while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        Serial.println(".");              // working on it...
+        Serial.println("."); // working on it...
     }
     // IPAddress local_IP(192, 168, 0, 199);
-    IPAddress StaticIP(192, 168, 0, 210); //set staticIP
+    IPAddress StaticIP(192, 168, 0, 210);
     IPAddress gateway(192,168,0,1);
     IPAddress subnet(255,255,255,0);
     // IPAddress ip(192, 168, 0, 199);
@@ -51,16 +51,18 @@ void setup() {
 
     Serial.println("WiFi connected");
     Serial.print("IP: ");
-    Serial.println(WiFi.localIP());      //Print LocalIP for Serial Monitor
+    Serial.println(WiFi.localIP());
 
     Serial.println("Starting UDP");
     Udp.begin(localPort);
     Serial.print("Local port: ");
+    // Serial.println(Udp.localPort());
 
 
-                                        // wait a few seconds so someone can see the IP address if they're watching
+    // wait a few seconds so someone can see the IP address if they're watching
     delay(3000);
 
+      //Serial.begin(921600);
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
   for(int i = 0; i<NUM_LEDS; i++){
     leds[i] = CHSV(50,255,0); 
@@ -90,19 +92,19 @@ delay(random(20,50));
 
 }
 
-void basicFlicker(){
-  for(int i = 0; i<NUM_LEDS; i++){
-    int heatindex = (CUR_COLOR + random(-2,2));
-    leds[i] = CHSV(heatindex, saturation, random(brightmin,brightmax));
-  }
-  FastLED.show();
+void basicFlicker(){                                                        //general flicker function, works to maintain the flickering effect
+  for(int i = 0; i<NUM_LEDS; i++){                                          //loop that adjusts the color, brightness, and value/brightness of all leds
+    int heatindex = (CUR_COLOR + random(-2,2));                             //generates random color in range of CUR_COLOR
+    leds[i] = CHSV(heatindex, saturation, random(brightmin,brightmax));     //generates random value in range of brightness, and applies to current led
+  } 
+  FastLED.show();                                                           //applies changes to all leds on strip
 }
 
-void wipeOn(){
-  brightness = 0;
-  for(int i = 0; i<NUM_LEDS; i++){
-    brightness = brightness + 22;
-    brightmin = (brightness-FLICKER);     //Sets lower
+void wipeOn(){                                                              //Function that turns candles on gradually
+  brightness = 0;                                                           //ensures brightness is fully off
+  for(int i = 0; i<NUM_LEDS; i++){                                          //for each LED:
+    brightness = brightness + 22;                                               //up brightness by 1/10 of max brightness
+    brightmin = (brightness-FLICKER);     //Sets lower                              
     brightmax = (brightness+FLICKER);     //and upper brightness bounds for flicker
     for(int j = 0; j<=i; j++){
       int heatindex = (CUR_COLOR + random(-2,2));
@@ -114,8 +116,8 @@ void wipeOn(){
   state = 1;
 }
 
-void wipeOff(){   
-  brightness = 220;
+void wipeOff(){                                                   //Function that turns the candles off gradually
+  brightness = 220;                                               //resets brightness
   for(int i = 0; i<NUM_LEDS; i++){
     brightness = brightness - 22;         //Gradually lowers brightness
     brightmin = (brightness-FLICKER);     //Sets lower
@@ -135,26 +137,27 @@ void wipeOff(){
 }
 
 void idleTime(){
-  delay(5000);                           //delays for 5 seconds. Can be replaced by a wait for a message.
-  state = 2;                             //returns to wipeOn, raising the candless to lit.
+  delay(5000); //delays for 5 seconds. Can be replaced by a wait for a message.
+  state = 2;  //returns to wipeOn, raising the candless to lit.
 }
 
 
-void button_msg(OSCMessage &msg, int x)  //Function when microcontroller recieves button input
+void button_msg(OSCMessage &msg, int x)
 {
   if (wipeTemp == 0) {
-    state = 2;                           //wipeOn()
-    wipeTemp = 1;                        //set status to on
-  } else { 
-    state = 3;                           //wipeOff()
-    wipeTemp = 0;                        //set status to off
+    state = 2;
+    wipeTemp = 1;
+  } else {
+    state = 3;
+    wipeTemp = 0;
   }
+  Serial.print("button: ");
 }
 
 void brightness_msg(OSCMessage &msg, int x)
 {
   float data = msg.getFloat(0);
-  Serial.print("slider: ");             //send brightness value to serial monitor
+  Serial.print("slider: ");
   Serial.println(data);
 
   brightness = (data*100) + 70;
@@ -163,25 +166,46 @@ void brightness_msg(OSCMessage &msg, int x)
 void saturation_msg(OSCMessage &msg, int x)
 {
   float data = msg.getFloat(0);
-  Serial.print("slider: ");              //send saturation value to serial monitor
+  Serial.print("slider: ");
   Serial.println(data);
 
   saturation = data*254;
 }
 
-void loop() {
+void stepper_msg(OSCMessage &msg, int x)
+{
+  int data = msg.getInt(0);
+  Serial.print("stepper: ");
+  Serial.println(data);
 
-    OSCMessage msg; 
-    int size = Udp.parsePacket();       //size of UDP message
+  CUR_COLOR = 40 - (3.7*data);
+
+  if (CUR_COLOR < 4)
+  {
+    CUR_COLOR = 3;
+  }
+  if (CUR_COLOR > 40)
+  {
+    CUR_COLOR = 40;
+  }
+} 
+
+
+void loop() {
+  // put your main code here, to run repeatedly:
+
+    OSCMessage msg;
+    int size = Udp.parsePacket();
     if (size > 0) {
         while (size--) {
-            msg.fill(Udp.read());       //read the message
+            msg.fill(Udp.read());
         }
-        if (!msg.hasError()) {          //if microcontroller recieves message
+        if (!msg.hasError()) {
 
-            msg.route("/toggle", button_msg); //call button_msg
-            msg.route("/brightness", brightness_msg); //call brightness_msg
-            msg.route("/saturation", saturation_msg); //call saturation_msg
+            msg.route("/toggle", button_msg);
+            msg.route("/brightness", brightness_msg);
+            msg.route("/saturation", saturation_msg);
+            msg.route("/stepper", stepper_msg);
 
         } else {
             error = msg.getError();
@@ -190,6 +214,6 @@ void loop() {
         }
     }
 
-flicker();                             //call flicker loop to change state
+flicker();
 
 }
